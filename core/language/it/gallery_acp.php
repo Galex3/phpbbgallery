@@ -283,6 +283,8 @@ $lang = array_merge($lang, array(
 	'PHPBB_INTEGRATION'				=> 'integrazione phpBB',
 	'PNG_ALLOWED'					=> 'Consenti invio di files PNG',
 	'WEBP_ALLOWED'					=> 'Consenti invio di files WEBP',
+	'AVIF_ALLOWED'					=> 'Consenti invio di files AVIF',
+	'TIFF_ALLOWED'					=> 'Consenti invio di files TIFF/TIF',
 	'PURGED_CACHE'					=> 'Svuotata la cache',
 
 	'RATE_SCALE'					=> 'Scala voti',

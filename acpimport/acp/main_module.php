@@ -70,7 +70,7 @@ class main_module
 				{
 					$filetype = getimagesize($image_src_full);
 					$filetype_ext = '';
-
+					$image_src_lower = strtolower($image_src);
 					$error_occurred = false;
 					switch ($filetype['mime'])
 					{
@@ -79,7 +79,7 @@ class main_module
 						case 'image/pjpeg':
 							$filetype_ext = '.jpg';
 							$read_function = 'imagecreatefromjpeg';
-							if ((substr(strtolower($image_src), -4) != '.jpg') && (substr(strtolower($image_src), -5) != '.jpeg'))
+							if ((substr($image_src_lower, -strlen($filetype_ext)) != '.jpg') && (substr($image_src_lower, -5) != '.jpeg'))
 							{
 								$this->log_import_error($import_schema, sprintf($user->lang['FILETYPE_MIMETYPE_MISMATCH'], $image_src, $filetype['mime']));
 								$error_occurred = true;
@@ -90,7 +90,7 @@ class main_module
 						case 'image/x-png':
 							$filetype_ext = '.png';
 							$read_function = 'imagecreatefrompng';
-							if (substr(strtolower($image_src), -4) != '.png')
+							if (substr($image_src_lower, -strlen($filetype_ext)) != '.png')
 							{
 								$this->log_import_error($import_schema, sprintf($user->lang['FILETYPE_MIMETYPE_MISMATCH'], $image_src, $filetype['mime']));
 								$error_occurred = true;
@@ -101,7 +101,7 @@ class main_module
 						case 'image/giff':
 							$filetype_ext = '.gif';
 							$read_function = 'imagecreatefromgif';
-							if (substr(strtolower($image_src), -4) != '.gif')
+							if (substr($image_src_lower, -strlen($filetype_ext)) != '.gif')
 							{
 								$this->log_import_error($import_schema, sprintf($user->lang['FILETYPE_MIMETYPE_MISMATCH'], $image_src, $filetype['mime']));
 								$error_occurred = true;
@@ -111,7 +111,28 @@ class main_module
 						case 'image/webp':
 							$filetype_ext = '.webp';
 							$read_function = 'imagecreatefromwebp';
-							if (substr(strtolower($image_src), -5) != '.webp')
+							if (substr($image_src_lower, -strlen($filetype_ext)) != '.webp')
+							{
+								$this->log_import_error($import_schema, sprintf($user->lang['FILETYPE_MIMETYPE_MISMATCH'], $image_src, $filetype['mime']));
+								$error_occurred = true;
+							}
+						break;
+
+						case 'image/tiff':
+						case 'image/tiff-fx':
+							$filetype_ext = '.tiff';
+							$read_function = 'imagecreatefromtiff';
+							if ((substr($image_src_lower, -strlen($filetype_ext)) != '.tiff') && (substr($image_src_lower, -4) != '.tif'))
+							{
+								$this->log_import_error($import_schema, sprintf($user->lang['FILETYPE_MIMETYPE_MISMATCH'], $image_src, $filetype['mime']));
+								$error_occurred = true;
+							}
+						break;
+
+						case 'image/avif':
+							$filetype_ext = '.avif';
+							$read_function = 'imagecreatefromavif';
+							if (substr($image_src_lower, -strlen($filetype_ext)) != '.avif')
 							{
 								$this->log_import_error($import_schema, sprintf($user->lang['FILETYPE_MIMETYPE_MISMATCH'], $image_src, $filetype['mime']));
 								$error_occurred = true;
@@ -368,13 +389,7 @@ class main_module
 		$files = array();
 		while ($file = readdir($handle))
 		{
-			if (!is_dir($gallery_url->path('import') . $file) && (
-			((substr(strtolower($file), -5) == '.webp') && $gallery_config->get('allow_webp')) ||
-			((substr(strtolower($file), -4) == '.png') && $gallery_config->get('allow_png')) ||
-			((substr(strtolower($file), -4) == '.gif') && $gallery_config->get('allow_gif')) ||
-			((substr(strtolower($file), -4) == '.jpg') && $gallery_config->get('allow_jpg')) ||
-			((substr(strtolower($file), -5) == '.jpeg') && $gallery_config->get('allow_jpg'))
-			))
+			if (!is_dir($gallery_url->path('import') . $file) && $this->is_supported_image_file(strtolower($file)))
 			{
 				$files[utf8_strtolower($file)] = $file;
 			}
@@ -457,5 +472,30 @@ class main_module
 		$error_file = $gallery_url->_return_file($import_schema . '_errors', 'import', '');
 		$content = @file_get_contents($error_file);
 		file_put_contents($error_file, $content .= (($content) ? "\n" : '') . $error);
+	}
+
+	private function is_supported_image_file($filename): bool
+	{
+		global $gallery_config;
+				
+		// Define supported extensions and their configuration keys
+		$supported_extensions = [
+			'.avif' => 'allow_avif',
+			'.tif' => 'allow_tiff',
+			'.tiff' => 'allow_tiff',
+			'.webp' => 'allow_webp',
+			'.png' => 'allow_png',
+			'.gif' => 'allow_gif',
+			'.jpg' => 'allow_jpg',
+			'.jpeg' => 'allow_jpg'
+		];
+		
+		foreach ($supported_extensions as $extension => $config_key) {
+			if (substr($filename, -strlen($extension)) === $extension && $gallery_config->get($config_key)) {
+				return true;
+			}
+		}
+		
+		return false;
 	}
 }

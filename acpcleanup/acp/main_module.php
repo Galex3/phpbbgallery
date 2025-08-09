@@ -363,20 +363,18 @@ class main_module
 			$handle = opendir($directory);
 			while ($file = readdir($handle))
 			{
-				if (!is_dir($directory . $file) &&
-				 ((substr(strtolower($file), '-5') == '.webp') || (substr(strtolower($file), '-4') == '.png') || (substr(strtolower($file), '-4') == '.gif') || (substr(strtolower($file), '-4') == '.jpg') || (substr(strtolower($file), '-5') == '.jpeg')) &&
-				 ((substr(strtolower($file), '-8') <> '_wm.webp') && (substr(strtolower($file), '-7') <> '_wm.png') && (substr(strtolower($file), '-7') <> '_wm.gif') && (substr(strtolower($file), '-7') <> '_wm.jpg') && (substr(strtolower($file), '-8') <> '_wm.jpeg'))
-				 && !in_array($file, $requested_source)
-				)
+				if (!is_dir($directory . $file) && $this->check_image_extension(strtolower($file)) && !in_array($file, $requested_source))
 				{
 					if ((strpos($file, 'image_not_exist') !== false) || (strpos($file, 'not_authorised') !== false) || (strpos($file, 'no_hotlinking') !== false))
 					{
 						continue;
 					}
 
-					$template->assign_block_vars('entryrow', array(
-						'FILE_NAME'				=> utf8_encode($file),
-					));
+					// Get file name encoding
+					$encoding = mb_detect_encoding($file, ['UTF-8', 'ISO-8859-1', 'Windows-1252'], true);
+					$template->assign_block_vars('entryrow', [
+						'FILE_NAME'	=> $encoding === 'UTF-8' ? $file : mb_convert_encoding($file, 'UTF-8', $encoding),
+					]);
 				}
 			}
 			closedir($handle);
@@ -484,7 +482,31 @@ class main_module
 			'U_FIND_USERNAME'		=> $gallery_url->append_sid('phpbb', 'memberlist', 'mode=searchuser&amp;form=acp_gallery&amp;field=prune_usernames'),
 			'S_SELECT_ALBUM'		=> $gallery_album->get_albumbox(false, '', false, false, false, (int) \phpbbgallery\core\block::PUBLIC_ALBUM, (int) \phpbbgallery\core\block::TYPE_UPLOAD),
 
-			'S_FOUNDER'				=> ($user->data['user_type'] == USER_FOUNDER) ? true : false,
+			'S_FOUNDER'				=> $user->data['user_type'] == USER_FOUNDER,
 		));
+	}
+
+	private function check_image_extension($image_filename): bool
+	{
+		$filename_suffix = '_wm';
+		
+		// Define all supported extensions
+		$supported_extensions = ['.jpg', '.jpeg', '.gif', '.png', '.webp', '.avif', '.tif', '.tiff'];
+		
+		// Check if the file has a supported extension
+		foreach ($supported_extensions as $extension) {
+			// Check if file ends with this extension
+			if (substr($image_filename, -strlen($extension)) === $extension) {
+				// Check if the file is NOT a watermark file
+				$watermark_suffix = "{$filename_suffix}{$extension}";
+				if (substr($image_filename, -strlen($watermark_suffix)) === $watermark_suffix) {
+					// It's a watermark file, so exclude it
+					return false;
+				}
+				return true;
+			}
+		}
+		
+		return false;
 	}
 }

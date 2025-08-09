@@ -35,6 +35,8 @@ class config
 		'allow_jpg'			=> true,
 		'allow_png'			=> true,
 		'allow_webp'		=> true,
+		'allow_avif'		=> true,
+		'allow_tiff'		=> true,
 		'allow_rates'		=> true,
 		'allow_resize'		=> true,
 		'allow_rotate'		=> true,

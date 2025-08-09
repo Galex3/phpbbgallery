@@ -125,7 +125,7 @@ class config_module
 					$cache_dir = @opendir($phpbb_gallery_url->path('thumbnail'));
 					while ($cache_file = @readdir($cache_dir))
 					{
-						if (preg_match('/(\_wm.webp$|\_wm.gif$|\_wm.png$|\_wm.jpg|\_wm.jpeg)$/is', $cache_file))
+						if (preg_match('/(\_wm.avif$|\_wm.tiff$|\_wm.tif$|\_wm.webp$|\_wm.gif$|\_wm.png$|\_wm.jpg|\_wm.jpeg)$/is', $cache_file))
 						{
 							@unlink($phpbb_gallery_url->path('thumbnail') . $cache_file);
 						}
@@ -135,7 +135,7 @@ class config_module
 					$medium_dir = @opendir($phpbb_gallery_url->path('medium'));
 					while ($medium_file = @readdir($medium_dir))
 					{
-						if (preg_match('/(\_wm.webp$|\_wm.gif$|\_wm.png$|\_wm.jpg|\_wm.jpeg)$/is', $medium_file))
+						if (preg_match('/(\_wm.avif$|\_wm.tiff$|\_wm.tif$|\_wm.webp$|\_wm.gif$|\_wm.png$|\_wm.jpg|\_wm.jpeg)$/is', $medium_file))
 						{
 							@unlink($phpbb_gallery_url->path('medium') . $medium_file);
 						}
@@ -144,7 +144,7 @@ class config_module
 					$upload_dir = @opendir($phpbb_gallery_url->path('upload'));
 					while ($upload_file = @readdir($upload_dir))
 					{
-						if (preg_match('/(\_wm.webp$|\_wm.gif$|\_wm.png$|\_wm.jpg|\_wm.jpeg)$/is', $upload_file))
+						if (preg_match('/(\_wm.avif$|\_wm.tiff$|\_wm.tif$|\_wm.webp$|\_wm.gif$|\_wm.png$|\_wm.jpg|\_wm.jpeg)$/is', $upload_file))
 						{
 							@unlink($phpbb_gallery_url->path('upload') . $upload_file);
 						}
@@ -156,7 +156,7 @@ class config_module
 						$cache_dir = @opendir($phpbb_gallery_url->path('thumbnail') . $i . '/');
 						while ($cache_file = @readdir($cache_dir))
 						{
-							if (preg_match('/(\_wm.webp$|\_wm.gif$|\_wm.png$|\_wm.jpg|\_wm.jpeg)$/is', $cache_file))
+							if (preg_match('/(\_wm.avif$|\_wm.tiff$|\_wm.tif$|\_wm.webp$|\_wm.gif$|\_wm.png$|\_wm.jpg|\_wm.jpeg)$/is', $cache_file))
 							{
 								@unlink($phpbb_gallery_url->path('thumbnail') . $i . '/' . $cache_file);
 							}
@@ -166,7 +166,7 @@ class config_module
 						$medium_dir = @opendir($phpbb_gallery_url->path('medium') . $i . '/');
 						while ($medium_file = @readdir($medium_dir))
 						{
-							if (preg_match('/(\_wm.webp$|\_wm.gif$|\_wm.png$|\_wm.jpg|\_wm.jpeg)$/is', $medium_file))
+							if (preg_match('/(\_wm.avif$|\_wm.tiff$|\_wm.tif$|\_wm.webp$|\_wm.gif$|\_wm.png$|\_wm.jpg|\_wm.jpeg)$/is', $medium_file))
 							{
 								@unlink($phpbb_gallery_url->path('medium') . $i . '/' . $medium_file);
 							}
@@ -175,7 +175,7 @@ class config_module
 						$upload_dir = @opendir($phpbb_gallery_url->path('upload') . $i . '/');
 						while ($upload_file = @readdir($upload_dir))
 						{
-							if (preg_match('/(\_wm.webp$|\_wm.gif$|\_wm.png$|\_wm.jpg|\_wm.jpeg)$/is', $upload_file))
+							if (preg_match('/(\_wm.avif$|\_wm.tiff$|\_wm.tif$|\_wm.webp$|\_wm.gif$|\_wm.png$|\_wm.jpg|\_wm.jpeg)$/is', $upload_file))
 							{
 								@unlink($phpbb_gallery_url->path('upload') . $upload_file);
 							}
@@ -371,7 +371,9 @@ class config_module
 					'allow_gif'				=> array('lang' => 'GIF_ALLOWED',			'validate' => 'bool',	'type' => 'radio:yes_no'),
 					'allow_jpg'				=> array('lang' => 'JPG_ALLOWED',			'validate' => 'bool',	'type' => 'radio:yes_no'),
 					'allow_png'				=> array('lang' => 'PNG_ALLOWED',			'validate' => 'bool',	'type' => 'radio:yes_no'),
-					'allow_webp'				=> array('lang' => 'WEBP_ALLOWED',			'validate' => 'bool',	'type' => 'radio:yes_no'),
+					'allow_webp'			=> array('lang' => 'WEBP_ALLOWED',			'validate' => 'bool',	'type' => 'radio:yes_no'),
+					'allow_avif'			=> ['lang' => 'AVIF_ALLOWED',			'validate' => 'bool',	'type' => 'radio:yes_no'],
+					'allow_tiff'			=> ['lang' => 'TIFF_ALLOWED',			'validate' => 'bool',	'type' => 'radio:yes_no'],
 					'allow_zip'				=> array('lang' => 'ZIP_ALLOWED',			'validate' => 'bool',	'type' => 'radio:yes_no'),
 					'description_length'	=> array('lang' => 'IMAGE_DESC_MAX_LENGTH',	'validate' => 'int',	'type' => 'text:7:5',		'append' => 'CHARACTERS'),
 					'disp_nextprev_thumbnail'	=> array('lang' => 'DISP_NEXTPREV_THUMB','validate' => 'bool',	'type' => 'radio:yes_no'),

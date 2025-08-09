@@ -772,35 +772,59 @@ class upload
 	 */
 	public function get_allowed_types($get_types = false, $ignore_zip = false)
 	{
-		$extensions = $types = array();
-		if ($this->gallery_config->get('allow_jpg'))
-		{
-			$types[] = $this->language->lang('FILETYPES_JPG');
-			$extensions[] = 'jpg';
-			$extensions[] = 'jpeg';
-		}
-		if ($this->gallery_config->get('allow_gif'))
-		{
-			$types[] = $this->language->lang('FILETYPES_GIF');
-			$extensions[] = 'gif';
-		}
-		if ($this->gallery_config->get('allow_png'))
-		{
-			$types[] = $this->language->lang('FILETYPES_PNG');
-			$extensions[] = 'png';
-		}
-		if ($this->gallery_config->get('allow_webp'))
-		{
-			$types[] = $this->language->lang('FILETYPES_WEBP');
-			$extensions[] = 'webp';
-		}
-		if (!$ignore_zip && $this->gallery_config->get('allow_zip'))
-		{
-			$types[] = $this->language->lang('FILETYPES_ZIP');
-			$extensions[] = 'zip';
+		$extensions = $types = [];
+		
+		// Define supported file types and their configuration keys
+		$supported_types = [
+			'jpg' => [
+				'config_key' => 'allow_jpg',
+				'lang_key' => 'FILETYPES_JPG',
+				'extensions' => ['jpg', 'jpeg']
+			],
+			'gif' => [
+				'config_key' => 'allow_gif',
+				'lang_key' => 'FILETYPES_GIF',
+				'extensions' => ['gif']
+			],
+			'png' => [
+				'config_key' => 'allow_png',
+				'lang_key' => 'FILETYPES_PNG',
+				'extensions' => ['png']
+			],
+			'webp' => [
+				'config_key' => 'allow_webp',
+				'lang_key' => 'FILETYPES_WEBP',
+				'extensions' => ['webp']
+			],
+			'avif' => [
+				'config_key' => 'allow_avif',
+				'lang_key' => 'FILETYPES_AVIF',
+				'extensions' => ['avif']
+			],
+			'tiff' => [
+				'config_key' => 'allow_tiff',
+				'lang_key' => 'FILETYPES_TIFF',
+				'extensions' => ['tiff', 'tif']
+			],
+			'zip' => [
+				'config_key' => 'allow_zip',
+				'lang_key' => 'FILETYPES_ZIP',
+				'extensions' => ['zip']
+			]
+		];
+		
+		foreach ($supported_types as $type => $config) {
+			if ($type === 'zip' && $ignore_zip) {
+				continue;
+			}
+			
+			if ($this->gallery_config->get($config['config_key'])) {
+				$types[] = $this->language->lang($config['lang_key']);
+				$extensions = array_merge($extensions, $config['extensions']);
+			}
 		}
 
-		return ($get_types) ? $types : $extensions;
+		return $get_types ? $types : $extensions;
 	}
 
 	/**

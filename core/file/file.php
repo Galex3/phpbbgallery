@@ -115,20 +115,28 @@ class file
 	 */
 	static public function mimetype_by_filename($filename)
 	{
-		switch (utf8_substr(strtolower($filename), -4))
+		$file_extension = strtolower(substr($filename, strrpos($filename, '.') + 1));
+		switch ($file_extension)
 		{
-			case '.png':
+			case 'png':
 				return 'image/png';
 			break;
-			case '.gif':
+			case 'gif':
 				return 'image/gif';
 			break;
 			case 'jpeg':
-			case '.jpg':
+			case 'jpg':
 				return 'image/jpeg';
 			break;
-			case '.webp':
+			case 'webp':
 				return 'image/webp';
+			break;
+			case 'avif':
+				return 'image/avif';
+			break;
+			case 'tiff':
+			case 'tif':
+				return 'image/tiff';
 			break;
 		}
 
@@ -137,23 +145,12 @@ class file
 
 	static public function extension_by_filename($filename)
 	{
-		switch (utf8_substr(strtolower($filename), -4))
+		$supported_extensions = ['png', 'gif', 'jpg', 'jpeg', 'webp', 'avif', 'tiff', 'tif'];
+		$file_extension = strtolower(utf8_substr($filename, strrpos($filename, '.') + 1));
+		if (in_array($file_extension, $supported_extensions))
 		{
-			case '.png':
-				return 'png';
-			break;
-			case '.gif':
-				return 'gif';
-			break;
-			case 'jpeg':
-			case '.jpg':
-				return 'jpg';
-			break;
-			case '.webp':
-				return 'webp';
-			break;
+			return $file_extension;
 		}
-
 		return '';
 	}
 
@@ -169,7 +166,7 @@ class file
 			return false;
 		}
 
-		switch (utf8_substr(strtolower($this->image_source), -4))
+		switch (utf8_substr(strtolower($this->image_source), strrpos($this->image_source, '.')))
 		{
 			case '.png':
 				$this->image_type = 'png';
@@ -180,6 +177,15 @@ class file
 			case '.webp':
 				$this->image_type = 'webp';
 				$this->image = imagecreatefromwebp($this->image_source);
+			break;
+			case '.tiff':
+			case '.tif':
+				$this->image_type = 'tiff';
+				$this->image = imagecreatefromtiff($this->image_source);
+			break;
+			case '.avif':
+				$this->image_type = 'avif';
+				$this->image = imagecreatefromavif($this->image_source);
 			break;
 			case '.gif':
 				$this->image_type = 'gif';
@@ -232,6 +238,12 @@ class file
 			break;
 			case 'webp':
 				imagewebp($this->image, $destination);
+			break;
+			case 'tiff':
+				imagetiff($this->image, $destination);
+			break;
+			case 'avif':
+				imageavif($this->image, $destination);
 			break;
 			case 'gif':
 				imagegif($this->image, $destination);
@@ -455,6 +467,13 @@ class file
 					break;
 				case 'image/webp':
 					$imagecreate = 'imagecreatefromwebp';
+					break;
+				case 'image/tiff':
+				case 'image/tiff-fx':
+					$imagecreate = 'imagecreatefromtiff';
+					break;
+				case 'image/avif':
+					$imagecreate = 'imagecreatefromavif';
 					break;
 				case 'image/gif':
 					$imagecreate = 'imagecreatefromgif';

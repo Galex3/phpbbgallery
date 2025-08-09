@@ -284,6 +284,8 @@ $lang = array_merge($lang, array(
 	'PHPBB_INTEGRATION'        => 'phpBB integration',
 	'PNG_ALLOWED'              => 'Allowed to upload PNG files',
 	'WEBP_ALLOWED'             => 'Allowed to upload WEBP files',
+	'AVIF_ALLOWED'             => 'Allowed to upload AVIF files',
+	'TIFF_ALLOWED'             => 'Allowed to upload TIFF/TIF files',
 	'PURGED_CACHE'             => 'Purged the cache',
 
 	'RATE_SCALE'                 => 'Rating scale',

@@ -284,7 +284,9 @@ $lang = array_merge($lang, array(
 	'RECENT_ON_INDEX_COUNT'			=> 'Conteo de imágenes recientes',
 	'PHPBB_INTEGRATION'				=> 'Integración de phpBB',
 	'PNG_ALLOWED'					=> 'Permitido subir archivos PNG',
-	'WEBP_ALLOWED'					=> 'Allowed to upload WEBP files',
+	'WEBP_ALLOWED'					=> 'Permitido subir archivos WEBP',
+	'AVIF_ALLOWED'					=> 'Permitido subir archivos AVIF',
+	'TIFF_ALLOWED'					=> 'Permitido subir archivos TIFF/TIF',
 	'PURGED_CACHE'					=> 'Purgó la caché',
 
 	'RATE_SCALE'					=> 'Escala de calificación',

@@ -285,6 +285,8 @@ $lang = array_merge($lang, array(
 	'PHPBB_INTEGRATION'        => 'Интеграция в phpBB',
 	'PNG_ALLOWED'              => 'Разрешено качването на PNG файлове',
 	'WEBP_ALLOWED'              => 'Разрешено качването на WEBP файлове',
+	'AVIF_ALLOWED'              => 'Разрешено качването на AVIF файлове',
+	'TIFF_ALLOWED'              => 'Разрешено качването на TIFF/TIF файлове',
 	'PURGED_CACHE'             => 'Кешът е прочистен',
 
 	'RATE_SCALE'                 => 'Скала за оценяване',

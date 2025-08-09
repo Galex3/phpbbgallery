@@ -299,6 +299,8 @@ $lang = array_merge($lang, array(
 	'PHPBB_INTEGRATION'				=> 'Intégration à phpBB',
 	'PNG_ALLOWED'					=> 'Autoriser à charger des fichiers PNG',
 	'WEBP_ALLOWED'					=> 'Autoriser à charger des fichiers WEBP',
+	'AVIF_ALLOWED'					=> 'Autoriser à charger des fichiers AVIF',
+	'TIFF_ALLOWED'					=> 'Autoriser à charger des fichiers TIFF/TIF',
 	'PURGED_CACHE'					=> 'Vider le cache',
 
 	'RATE_SCALE'					=> 'Notes sur',
