@@ -74,6 +74,7 @@ class file
 		$this->url = $url;
 		$this->gallery_config = $gallery_config;
 		$this->gd_version = $gd_version;
+		$this->init_tiff_handler();
 	}
 
 	public function set_image_options($max_file_size, $max_height, $max_width)
@@ -176,24 +177,24 @@ class file
 			break;
 			case '.webp':
 				$this->image_type = 'webp';
-				$this->image = imagecreatefromwebp($this->image_source);
+				$this->image = @imagecreatefromwebp($this->image_source);
 			break;
 			case '.tiff':
 			case '.tif':
 				$this->image_type = 'tiff';
-				$this->image = imagecreatefromtiff($this->image_source);
+				$this->image = $this->create_from_tiff($this->image_source);
 			break;
 			case '.avif':
 				$this->image_type = 'avif';
-				$this->image = imagecreatefromavif($this->image_source);
+				$this->image = @imagecreatefromavif($this->image_source);
 			break;
 			case '.gif':
 				$this->image_type = 'gif';
-				$this->image = imagecreatefromgif($this->image_source);
+				$this->image = @imagecreatefromgif($this->image_source);
 			break;
 			default:
 				$this->image_type = 'jpeg';
-				$this->image = imagecreatefromjpeg($this->image_source);
+				$this->image = @imagecreatefromjpeg($this->image_source);
 			break;
 		}
 
@@ -240,7 +241,7 @@ class file
 				imagewebp($this->image, $destination);
 			break;
 			case 'tiff':
-				imagetiff($this->image, $destination);
+				$this->write_as_tiff($this->image, $destination);
 			break;
 			case 'avif':
 				imageavif($this->image, $destination);
@@ -470,7 +471,7 @@ class file
 					break;
 				case 'image/tiff':
 				case 'image/tiff-fx':
-					$imagecreate = 'imagecreatefromtiff';
+					$imagecreate = '$this->create_from_tiff';
 					break;
 				case 'image/avif':
 					$imagecreate = 'imagecreatefromavif';
@@ -581,5 +582,191 @@ class file
 				@unlink($this->url->path($location) . $get_wm_name);
 			}
 		}
+	}
+
+	/**
+	 * Create GD image resource from TIFF file
+	 * Attempts multiple methods to handle TIFF files
+	 *
+	 * @param string $tiff_file Path to TIFF file
+	 * @return resource|false GD image resource or false on failure
+	 */
+	public function create_from_tiff($tiff_file)
+	{
+		return $this->tiff_handler->convert_tiff_to_gd($tiff_file, $this->errors);
+	}
+
+	/**
+	 * Write GD image resource as TIFF file
+	 * Attempts multiple methods to write TIFF files
+	 *
+	 * @param resource $gd_image GD image resource
+	 * @param string $destination Path to destination TIFF file
+	 * @return bool True on success, false on failure
+	 */
+	private function write_as_tiff($gd_image, $destination)
+	{
+		return $this->tiff_handler->convert_gd_to_tiff($gd_image, $destination, $this->errors);
+	}
+
+	/**
+	 * TIFF Handler - manages TIFF conversion operations
+	 */
+	private $tiff_handler;
+
+	/**
+	 * Initialize TIFF handler
+	 */
+	private function init_tiff_handler()
+	{
+		if (!$this->tiff_handler) {
+			$this->tiff_handler = new TiffHandler();
+		}
+	}
+}
+
+/**
+ * TIFF Handler Class - manages TIFF conversion operations
+ * Handles both reading and writing TIFF files using various methods
+ */
+class TiffHandler
+{
+	/**
+	 * Convert TIFF file to GD image resource
+	 *
+	 * @param string $tiff_file Path to TIFF file
+	 * @param array &$errors Array to collect error messages
+	 * @return resource|false GD image resource or false on failure
+	 */
+	public function convert_tiff_to_gd($tiff_file, &$errors)
+	{
+		// Method 1: Try ImageMagick if available
+		if (extension_loaded('imagick')) {
+			try {
+				$imagick = new \Imagick($tiff_file);
+				$imagick->setImageFormat('png');
+				
+				// Create temporary PNG file
+				$temp_png = tempnam(sys_get_temp_dir(), 'tiff_') . '.png';
+				$imagick->writeImage($temp_png);
+				$imagick->clear();
+				$imagick->destroy();
+				
+				// Load PNG with GD
+				$gd_image = imagecreatefrompng($temp_png);
+				
+				// Clean up temp file
+				@unlink($temp_png);
+				
+				if ($gd_image !== false) {
+					return $gd_image;
+				}
+			} catch (\Exception $e) {
+				$errors[] = 'ImageMagick failed to process TIFF file: ' . $e->getMessage();
+			}
+		}
+		
+		// Method 2: Try command-line ImageMagick if available
+		$temp_png = tempnam(sys_get_temp_dir(), 'tiff_') . '.png';
+		$command = "convert \"{$tiff_file}\" \"{$temp_png}\" 2>&1";
+		$output = shell_exec($command);
+		
+		if (file_exists($temp_png) && filesize($temp_png) > 0) {
+			$gd_image = imagecreatefrompng($temp_png);
+			@unlink($temp_png);
+			
+			if ($gd_image !== false) {
+				return $gd_image;
+			}
+		}
+		
+		// Method 3: Try command-line GraphicsMagick if available
+		$command = "gm convert \"{$tiff_file}\" \"{$temp_png}\" 2>&1";
+		$output = shell_exec($command);
+		
+		if (file_exists($temp_png) && filesize($temp_png) > 0) {
+			$gd_image = imagecreatefrompng($temp_png);
+			@unlink($temp_png);
+			
+			if ($gd_image !== false) {
+				return $gd_image;
+			}
+		}
+		
+		// Method 4: Try using GD's built-in getimagesize to detect format
+		$image_info = getimagesize($tiff_file);
+		if ($image_info !== false) {
+			$errors[] = 'TIFF file detected but GD cannot process it. ImageMagick or GraphicsMagick is required.';
+		} else {
+			$errors[] = 'Invalid or corrupted TIFF file.';
+		}
+		
+		return false;
+	}
+
+	/**
+	 * Convert GD image resource to TIFF file
+	 *
+	 * @param resource $gd_image GD image resource
+	 * @param string $destination Path to destination TIFF file
+	 * @param array &$errors Array to collect error messages
+	 * @return bool True on success, false on failure
+	 */
+	public function convert_gd_to_tiff($gd_image, $destination, &$errors)
+	{
+		// Method 1: Try ImageMagick if available
+		if (extension_loaded('imagick')) {
+			try {
+				// Create temporary PNG file from GD resource
+				$temp_png = tempnam(sys_get_temp_dir(), 'gd_') . '.png';
+				imagepng($gd_image, $temp_png);
+				
+				// Convert PNG to TIFF using ImageMagick
+				$imagick = new \Imagick($temp_png);
+				$imagick->setImageFormat('tiff');
+				$imagick->writeImage($destination);
+				$imagick->clear();
+				$imagick->destroy();
+				
+				// Clean up temp file
+				@unlink($temp_png);
+				
+				return true;
+			} catch (\Exception $e) {
+				$errors[] = 'ImageMagick failed to write TIFF file: ' . $e->getMessage();
+				@unlink($temp_png);
+			}
+		}
+		
+		// Method 2: Try command-line ImageMagick if available
+		$temp_png = tempnam(sys_get_temp_dir(), 'gd_') . '.png';
+		imagepng($gd_image, $temp_png);
+		
+		$command = "convert \"{$temp_png}\" \"{$destination}\" 2>&1";
+		$output = shell_exec($command);
+		
+		@unlink($temp_png);
+		
+		if (file_exists($destination) && filesize($destination) > 0) {
+			return true;
+		}
+		
+		// Method 3: Try command-line GraphicsMagick if available
+		$temp_png = tempnam(sys_get_temp_dir(), 'gd_') . '.png';
+		imagepng($gd_image, $temp_png);
+		
+		$command = "gm convert \"{$temp_png}\" \"{$destination}\" 2>&1";
+		$output = shell_exec($command);
+		
+		@unlink($temp_png);
+		
+		if (file_exists($destination) && filesize($destination) > 0) {
+			return true;
+		}
+		
+		// Method 4: Fallback - write as PNG instead of TIFF
+		$errors[] = 'TIFF writing failed. No ImageMagick or GraphicsMagick available. Writing as PNG instead.';
+		imagepng($gd_image, $destination);
+		return true;
 	}
 }

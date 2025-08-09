@@ -78,7 +78,6 @@ class main_module
 						case 'image/jpg':
 						case 'image/pjpeg':
 							$filetype_ext = '.jpg';
-							$read_function = 'imagecreatefromjpeg';
 							if ((substr($image_src_lower, -strlen($filetype_ext)) != '.jpg') && (substr($image_src_lower, -5) != '.jpeg'))
 							{
 								$this->log_import_error($import_schema, sprintf($user->lang['FILETYPE_MIMETYPE_MISMATCH'], $image_src, $filetype['mime']));
@@ -89,7 +88,6 @@ class main_module
 						case 'image/png':
 						case 'image/x-png':
 							$filetype_ext = '.png';
-							$read_function = 'imagecreatefrompng';
 							if (substr($image_src_lower, -strlen($filetype_ext)) != '.png')
 							{
 								$this->log_import_error($import_schema, sprintf($user->lang['FILETYPE_MIMETYPE_MISMATCH'], $image_src, $filetype['mime']));
@@ -100,7 +98,6 @@ class main_module
 						case 'image/gif':
 						case 'image/giff':
 							$filetype_ext = '.gif';
-							$read_function = 'imagecreatefromgif';
 							if (substr($image_src_lower, -strlen($filetype_ext)) != '.gif')
 							{
 								$this->log_import_error($import_schema, sprintf($user->lang['FILETYPE_MIMETYPE_MISMATCH'], $image_src, $filetype['mime']));
@@ -110,7 +107,6 @@ class main_module
 
 						case 'image/webp':
 							$filetype_ext = '.webp';
-							$read_function = 'imagecreatefromwebp';
 							if (substr($image_src_lower, -strlen($filetype_ext)) != '.webp')
 							{
 								$this->log_import_error($import_schema, sprintf($user->lang['FILETYPE_MIMETYPE_MISMATCH'], $image_src, $filetype['mime']));
@@ -121,7 +117,6 @@ class main_module
 						case 'image/tiff':
 						case 'image/tiff-fx':
 							$filetype_ext = '.tiff';
-							$read_function = 'imagecreatefromtiff';
 							if ((substr($image_src_lower, -strlen($filetype_ext)) != '.tiff') && (substr($image_src_lower, -4) != '.tif'))
 							{
 								$this->log_import_error($import_schema, sprintf($user->lang['FILETYPE_MIMETYPE_MISMATCH'], $image_src, $filetype['mime']));
@@ -131,7 +126,6 @@ class main_module
 
 						case 'image/avif':
 							$filetype_ext = '.avif';
-							$read_function = 'imagecreatefromavif';
 							if (substr($image_src_lower, -strlen($filetype_ext)) != '.avif')
 							{
 								$this->log_import_error($import_schema, sprintf($user->lang['FILETYPE_MIMETYPE_MISMATCH'], $image_src, $filetype['mime']));
